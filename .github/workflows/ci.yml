@@ -25,7 +25,7 @@ jobs:
         run: npm test -w supabase
       - name: Dependency audit (fails on high-severity problems)
         run: npm audit --audit-level=high
-      - name: Builds (production settings: no demo code in the shipped apps)
+      - name: "Builds (production settings: no demo code in the shipped apps)"
         run: npm run build
         env:
           VITE_DEMO: 'false'
