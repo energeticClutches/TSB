@@ -64,8 +64,22 @@ build differs from a design document, the reason is given here.
 - The Lucky Draw has no money value on the books: the tokens are draw entries, not credit, so there is no liability figure. The Reports tab shows how many of the 500 numbers have gone and how far customers have got.
 - All times are Indian Standard Time; a "day" runs midnight to midnight IST.
 
+## Source control and CI
+- The repository is **public** at `github.com/energeticClutches/TSB`, default branch `main`.
+  Nothing secret is in it: only `.env.example` placeholders, and real keys live in Supabase
+  Edge Function secrets and Cloudflare build settings. Note that the fraud thresholds in
+  `docs/PHASE-4-DATABASE.md` §10 are therefore public; none of them depend on being secret.
+- `.gitattributes` stores every text file with **LF**, so a clone on Windows, macOS or Linux
+  never shows whole files as changed. Shell and SQL files are forced to LF because CRLF breaks
+  `#!` lines and psql here-documents.
+- CI runs on every push and pull request: typecheck, the unit tests with the 100% coverage gate,
+  the database and API tests against the real migrations in PGlite, `npm audit`, production
+  builds, and a check that no demo code reaches the shipped admin bundle.
+- The workflow pins **both** the runner image (`ubuntu-24.04`) and the actions it uses (full
+  commit SHAs with the version in a comment, Phase 8 §3.2). A tag can be moved to point at new
+  code; a SHA cannot. Bump them deliberately and keep the comments honest.
+
 ## Open items carried forward
 - Set `VITE_ORDER_URL` (admin) to the final customer web address **before printing QR standees** (the address is inside every QR code).
 - Code-split the admin app by page (currently ~205 KB gzipped; it's a staff tool on shop Wi-Fi, so this is housekeeping, not a blocker).
 - Replace the placeholder logo in `packages/ui/src/Logo.tsx` with the traced poster logo (waiting on the original file).
-- Pin GitHub Actions to commit SHAs.

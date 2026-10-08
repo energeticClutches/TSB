@@ -1,0 +1,23 @@
+# Line endings. Everything in this repository is stored with LF, whatever the
+# machine it was written on, so a clone on Windows, macOS or Linux never shows a
+# whole file as changed just because of invisible characters.
+* text=auto eol=lf
+
+# Shell scripts and SQL must keep LF even on Windows: CRLF breaks `#!` lines and
+# confuses psql here-documents.
+*.sh text eol=lf
+*.sql text eol=lf
+
+# Binary: never touch these, and don't try to diff them as text.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+
+# The lockfile is generated. Collapsing it in diffs and reviews keeps the real
+# changes readable; resolve conflicts by re-running `npm install`.
+package-lock.json -diff linguist-generated
