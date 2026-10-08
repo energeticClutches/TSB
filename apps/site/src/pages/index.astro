@@ -1,0 +1,219 @@
+---
+import '../styles/global.css';
+
+/** Where the QR codes and the "Order now" button point. */
+const ORDER_URL = import.meta.env.PUBLIC_ORDER_URL ?? 'https://order.theslushbar.example';
+const MAPS_URL = 'https://maps.google.com/?q=The+Slush+Bar+Sector+6+Market+Bahadurgarh';
+
+const SLUSHES = [
+  { name: 'Blue Lagoon', note: 'Tangy blue curaçao citrus blast', img: '/img/blue-lagoon.webp', colour: '#00C0F3', ink: '#006B87' },
+  { name: 'Mango Mania', note: 'Ratnagiri Alphonso, silky and chilled', img: '/img/mango-mania.webp', colour: '#FFB300', ink: '#7A5300' },
+  { name: 'Strawberry Splash', note: 'Hill strawberries with fresh lime', img: '/img/strawberry-splash.webp', colour: '#FF1744', ink: '#8E0021' },
+  { name: 'Kiwi Kick', note: 'Crisp emerald kiwi on crushed ice', img: '/img/kiwi-kick.webp', colour: '#64DD17', ink: '#33690B' },
+  { name: 'Jamun Twist', note: 'Sweet-tangy black plum, rock salt', img: '/img/jamun-twist.webp', colour: '#7B1FA2', ink: '#4A1261' },
+];
+
+const FEATURES = [
+  { icon: '🍧', title: 'Premium flavours', text: 'Five signature slushes, blended to order.' },
+  { icon: '🍓', title: 'Fresh ingredients', text: 'Real fruit, no artificial aftertaste.' },
+  { icon: '❄️', title: 'Chilled to perfection', text: 'Choose your ice and sweetness.' },
+  { icon: '😎', title: 'For every mood', text: 'Shakes, mocktails and stone-fired pizzas too.' },
+];
+
+const STEPS = [
+  { n: 1, title: 'Scan the QR', text: 'It’s on your table, or at the counter. No app to install.' },
+  { n: 2, title: 'Pick and pay', text: 'Choose your size and add-ons, then pay by UPI in a tap.' },
+  { n: 3, title: 'We bring it over', text: 'Watch it being made on your phone. Dine-in, takeaway or delivery.' },
+];
+---
+
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Slush Bar · Cool down with slush · Sector-6 Market, Bahadurgarh</title>
+    <meta
+      name="description"
+      content="Premium slushes, thick shakes, mocktails and stone-fired pizzas at Shop No. 140, Sector-6 Market, Bahadurgarh. Scan the QR at your table, order and pay by UPI."
+    />
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="canonical" href={Astro.site?.href ?? '/'} />
+    <meta property="og:title" content="The Slush Bar · Cool down. Sip. Smile. Repeat." />
+    <meta property="og:description" content="Five signature slushes, blended to order. Scan, order and pay from your table." />
+    <meta property="og:image" content="/img/poster.webp" />
+    <meta property="og:type" content="website" />
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Restaurant',
+        name: 'The Slush Bar',
+        servesCuisine: ['Desserts', 'Beverages', 'Pizza'],
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'Shop No. 140, Sector-6 Market',
+          addressLocality: 'Bahadurgarh',
+          addressRegion: 'Haryana',
+          postalCode: '124507',
+          addressCountry: 'IN',
+        },
+        openingHours: 'Mo-Su 11:00-23:00',
+        url: Astro.site?.href,
+      })}
+    />
+  </head>
+  <body class="bg-surface text-ink antialiased">
+    <a href="#menu" class="sr-only focus:not-sr-only focus:absolute focus:m-2 focus:rounded-full focus:bg-brand focus:px-4 focus:py-2 focus:text-white">
+      Skip to the drinks
+    </a>
+
+    <!-- 1. Hero -->
+    <header class="relative overflow-hidden bg-gradient-to-b from-brand to-brand-ink px-5 py-14 text-center text-white sm:py-20">
+      <div class="pointer-events-none absolute inset-0 opacity-20" aria-hidden="true">
+        <div class="float absolute -top-10 -left-10 size-48 rounded-full bg-white/40 blur-2xl"></div>
+        <div class="float absolute top-24 -right-16 size-64 rounded-full bg-mango/40 blur-3xl" style="animation-delay:-2s"></div>
+      </div>
+      <p class="relative font-display text-sm font-black tracking-[0.3em] uppercase">The Slush Bar</p>
+      <h1 class="relative mx-auto mt-3 max-w-3xl font-display text-5xl leading-[0.95] font-black tracking-tight sm:text-7xl">
+        Cool down<br />with <span class="text-mango">slush</span>
+      </h1>
+      <p class="relative mx-auto mt-4 max-w-xl text-lg text-white/90">
+        Five signature slushes blended to order, plus thick shakes, mocktails and stone-fired pizzas. 100% vegetarian.
+      </p>
+      <div class="relative mt-7 flex flex-wrap justify-center gap-3">
+        <a
+          href={ORDER_URL}
+          class="rounded-full bg-white px-7 py-3.5 font-display text-lg font-black text-brand-ink shadow-xl transition hover:-translate-y-0.5"
+        >
+          View the menu
+        </a>
+        <a href="#visit" class="rounded-full border-2 border-white/70 px-7 py-3.5 font-display text-lg font-black transition hover:bg-white/10">
+          Visit us
+        </a>
+      </div>
+      <p class="relative mt-5 text-sm font-bold text-white/80">📱 At your table? Scan the QR code and order from your seat.</p>
+      <img
+        src="/img/poster.webp"
+        alt="Five Slush Bar cups: blue lagoon, mango, strawberry, kiwi and jamun"
+        width="1200"
+        height="600"
+        class="relative mx-auto mt-10 w-full max-w-3xl rounded-3xl shadow-2xl"
+        fetchpriority="high"
+      />
+    </header>
+
+    <!-- 2. The five slushes -->
+    <section id="menu" class="mx-auto max-w-6xl px-5 py-16">
+      <h2 class="text-center font-display text-4xl font-black tracking-tight">The iconic five</h2>
+      <p class="mt-2 text-center text-ink-muted">Regular 350 ml or Mega 500 ml. Add popping boba, fruit jelly or whipped cream.</p>
+      <ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+        {
+          SLUSHES.map((s) => (
+            <li class="overflow-hidden rounded-3xl bg-card shadow-card">
+              <img src={s.img} alt={`${s.name} slush`} width="400" height="400" loading="lazy" class="h-40 w-full object-cover" />
+              <div class="p-4">
+                <span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-black" style={`background:${s.colour}22;color:${s.ink}`}>
+                  {s.name}
+                </span>
+                <p class="mt-2 text-sm text-ink-muted">{s.note}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <!-- 3. Why people come back -->
+    <section class="bg-brand-tint px-5 py-16">
+      <ul class="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {
+          FEATURES.map((f) => (
+            <li class="rounded-3xl bg-card p-6 text-center shadow-card">
+              <p class="text-4xl" aria-hidden="true">
+                {f.icon}
+              </p>
+              <h3 class="mt-3 font-display text-lg font-black">{f.title}</h3>
+              <p class="mt-1 text-sm text-ink-muted">{f.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <!-- 4. How QR ordering works -->
+    <section class="mx-auto max-w-5xl px-5 py-16">
+      <h2 class="text-center font-display text-4xl font-black tracking-tight">Order from your table</h2>
+      <ol class="mt-10 grid gap-6 sm:grid-cols-3">
+        {
+          STEPS.map((s) => (
+            <li class="rounded-3xl bg-card p-6 shadow-card">
+              <span class="grid size-11 place-items-center rounded-full bg-brand font-display text-xl font-black text-white">{s.n}</span>
+              <h3 class="mt-4 font-display text-lg font-black">{s.title}</h3>
+              <p class="mt-1 text-sm text-ink-muted">{s.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="mt-8 text-center">
+        <a href={ORDER_URL} class="rounded-full bg-brand px-7 py-3.5 font-display text-lg font-black text-white shadow-glow transition hover:-translate-y-0.5">
+          Start your order
+        </a>
+      </p>
+    </section>
+
+    <!-- 5. Lucky Draw -->
+    <section class="bg-lagoon-tint px-5 py-16">
+      <div class="mx-auto max-w-3xl text-center">
+        <p class="text-4xl" aria-hidden="true">🎟️</p>
+        <h2 class="mt-2 font-display text-4xl font-black tracking-tight text-lagoon-ink">Spend ₹2,000, get a Lucky Draw token</h2>
+        <p class="mt-3 text-lagoon-ink">
+          Order with the same mobile number and your spending adds up by itself — across every visit, not one big bill. The moment it passes
+          ₹2,000 you get your Lucky Draw token, with your own number on it. No card, no app, nothing to carry.
+        </p>
+        <p class="mt-3 text-sm font-bold text-lagoon-ink">
+          Only 500 tokens in the whole campaign, and one per mobile number. GST isn't counted towards the ₹2,000.
+        </p>
+      </div>
+    </section>
+
+    <!-- 6. Visit us -->
+    <section id="visit" class="mx-auto max-w-5xl px-5 py-16">
+      <div class="grid gap-8 md:grid-cols-2">
+        <div>
+          <h2 class="font-display text-4xl font-black tracking-tight">Visit us</h2>
+          <address class="mt-4 text-lg not-italic">
+            Shop No. 140, The Slush Bar<br />
+            Sector-6 Market, Bahadurgarh<br />
+            Haryana 124507
+          </address>
+          <p class="mt-4 font-bold">Open every day · 11:00 AM – 11:00 PM</p>
+          <div class="mt-5 flex flex-wrap gap-3">
+            <a href={MAPS_URL} target="_blank" rel="noopener" class="rounded-full border-2 border-brand px-5 py-2.5 font-bold text-brand-ink">
+              Get directions
+            </a>
+            <a href={ORDER_URL} class="rounded-full bg-brand px-5 py-2.5 font-bold text-white shadow-glow">Order online</a>
+          </div>
+        </div>
+        <div class="rounded-3xl bg-card p-6 shadow-card">
+          <h3 class="font-display text-lg font-black">Good to know</h3>
+          <ul class="mt-3 flex flex-col gap-2 text-sm text-ink-muted">
+            <li>🌱 Everything we serve is vegetarian.</li>
+            <li>💳 Pay by any UPI app: GPay, PhonePe, Paytm.</li>
+            <li>🧾 Your receipt arrives on your phone, not on paper.</li>
+            <li>🛵 Delivery nearby, from the website.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <footer class="bg-ink px-5 py-10 text-center text-sm text-white/70">
+      <p class="font-display text-lg font-black text-white">The Slush Bar</p>
+      <p class="mt-1">Cool down. Sip. Smile. Repeat.</p>
+      <p class="mt-4">
+        <a href={`${ORDER_URL}/privacy`} class="underline">Privacy</a>
+      </p>
+      <p class="mt-2">© {new Date().getFullYear()} The Slush Bar, Bahadurgarh</p>
+    </footer>
+  </body>
+</html>

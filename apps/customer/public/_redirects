@@ -1,0 +1,4 @@
+# Single-page app: every route is served by index.html (the app does its own routing).
+# /v1/* is proxied to the Supabase Edge Function so the API is same-origin (Phase 7 §1.1).
+/v1/*  https://:project.supabase.co/functions/v1/api/v1/:splat  200
+/*     /index.html                                              200

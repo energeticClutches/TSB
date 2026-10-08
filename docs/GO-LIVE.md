@@ -1,0 +1,135 @@
+# Going live
+
+Everything below is done **once**, in order, by the developer with the Owner present for the
+account steps. Nothing here needs a paid service. Design references: docs/PHASE-5-ARCHITECTURE.md,
+docs/PHASE-8-SECURITY.md §4.
+
+## 1. What runs where
+
+| Piece | Where | Address |
+|---|---|---|
+| Marketing page (`apps/site`) | Cloudflare Pages project `slush-site` | `theslushbar.in` |
+| Customer ordering (`apps/customer`) | Cloudflare Pages project `slush-order` | `order.theslushbar.in` |
+| Staff app (`apps/admin`) | Cloudflare Pages project `slush-admin` | `admin.theslushbar.in` |
+| API + database | Supabase project (Mumbai) | `/v1/*` on both apps, proxied by `_redirects` |
+| Scheduled jobs | Supabase `pg_cron` → the Edge API | — |
+
+Each app has its own `public/_headers` (security headers) and `_redirects` (SPA routing and the
+`/v1/*` proxy). **Edit the `:project` placeholder in both `_redirects` files** to the real Supabase
+project ref before the first deploy.
+
+## 2. Build settings for each Cloudflare Pages project
+
+| Setting | site | order | admin |
+|---|---|---|---|
+| Build command | `npm run build -w apps/site` | `npm run build -w apps/customer` | `npm run build -w apps/admin` |
+| Output directory | `apps/site/dist` | `apps/customer/dist` | `apps/admin/dist` |
+| Environment | `PUBLIC_ORDER_URL` | `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_DEMO=false` | same as order, plus `VITE_ORDER_URL` |
+
+Setting `VITE_SUPABASE_URL` switches demo mode off; `VITE_DEMO=false` makes sure of it, and the
+build then contains none of the demo code.
+
+## 3. Database and API
+
+Follow "Setting up Supabase" in [IMPLEMENTATION-NOTES.md](IMPLEMENTATION-NOTES.md), then:
+
+```bash
+npx supabase db push                     # every migration
+npx supabase functions deploy api --no-verify-jwt
+npx supabase secrets set PIN_JWT_PRIVATE_JWK='…' RAZORPAY_KEY_ID='…' RAZORPAY_KEY_SECRET='…' \
+  RAZORPAY_WEBHOOK_SECRET='…' IDENTITY_PEPPER="$(openssl rand -hex 32)" JOB_SECRET="$(openssl rand -hex 32)" \
+  TURNSTILE_SECRET='…'
+```
+
+In Razorpay → Settings → Webhooks, add `https://<project>.supabase.co/functions/v1/api/v1/webhooks/razorpay`
+with the same webhook secret and these events: `payment.captured`, `payment.failed`, `order.paid`,
+`refund.processed`, `refund.failed`, `payment.dispute.created`, `payment.dispute.won`,
+`payment.dispute.lost`, `payment.dispute.closed`.
+
+## 4. Scheduled jobs
+
+Run once in the Supabase SQL editor (replace the URL and secret):
+
+```sql
+create extension if not exists pg_cron;
+create extension if not exists pg_net;
+
+-- Helper so the secret is written once.
+create or replace function app.call_job(p_path text) returns void
+language sql security definer set search_path = '' as $$
+  select net.http_post(
+    url := 'https://<project>.supabase.co/functions/v1/api/v1/jobs/' || p_path,
+    headers := jsonb_build_object('Content-Type', 'application/json', 'x-job-secret', '<JOB_SECRET>'),
+    body := '{}'::jsonb) is not null
+$$;
+
+select cron.schedule('slush-expire-payments', '*/5 * * * *', $$select app.call_job('expire-payments')$$);
+select cron.schedule('slush-reconcile',       '*/10 * * * *', $$select app.call_job('reconcile?window=2h')$$);
+select cron.schedule('slush-reconcile-day',   '30 21 * * *',  $$select app.call_job('reconcile?window=day')$$);  -- 03:00 IST
+select cron.schedule('slush-nightly',         '45 21 * * *',  $$select app.call_job('nightly')$$);               -- 03:15 IST
+```
+
+(pg_cron runs in UTC; 21:30 UTC = 03:00 IST.) What each one does:
+
+| Job | What it does |
+|---|---|
+| `expire-payments` | Closes checkouts nobody paid for, releasing their coupon slots |
+| `reconcile` | Asks Razorpay what it captured, repairs anything a missed webhook left behind, records the comparison on the Risk screen |
+| `nightly` | Runs the pattern fraud rules, checks both tamper-evident histories, removes abandoned checkouts over 30 days old |
+
+## 5. Test-mode run before switching to live keys
+
+With Razorpay **test** keys, on staging, do each of these once and check the result on the staff app:
+
+- [ ] Pay an order → it appears on the board with a pickup number
+- [ ] Pay, then close the app before the webhook → "I've paid but it's stuck" completes it
+- [ ] Pay twice for one order → the second payment is refunded automatically
+- [ ] Pay a wrong amount (Razorpay dashboard) → the order is held and flagged
+- [ ] Reject an order → the refund request appears; approve it as a different person → refunded
+- [ ] Partial refund of one item → the payment shows "partly refunded"
+- [ ] Open a dispute in the Razorpay test dashboard → the customer is frozen and the order held
+- [ ] Lucky Draw: take one mobile past ₹2,000 → a numbered token appears; order again → no second token; refund that order → the spending drops and the token is flagged for review
+- [ ] Coupons: use the last slot of a limited coupon from two phones at once → only one succeeds
+- [ ] Delivery: a pin outside the radius is refused
+
+## 6. Go-live security checklist (Phase 8 §4)
+
+Automated — `npm test` must be green (they run in CI on every change):
+
+- [x] Row-level security on **every** table, checked by a test that fails if a new table misses it
+- [x] The anonymous role can't read any table or call any internal function
+- [x] Every staff function refuses a caller with no session
+- [x] Webhooks: bad signature rejected, replay ignored, amount mismatch held
+- [x] Refunds: maker–checker, Owner limit, retry never pays twice
+- [x] Hash chains verified after tampering attempts
+
+By hand, before switching on live keys:
+
+- [ ] 2FA on the Owner in the app **and** on Supabase, Cloudflare, Razorpay, GitHub and the domain registrar
+- [ ] `_redirects` in both apps point at the real Supabase project
+- [ ] Security headers: A grade on securityheaders.com for all three sites; no `unsafe-inline` for scripts
+- [ ] No secrets in the repository (`git log -p | grep -i secret` and a scan of `.env*` files)
+- [ ] Razorpay **live** keys set as Edge Function secrets; test keys removed
+- [ ] Turnstile keys are the live ones; rate limits tried on checkout, find-order and PIN login
+- [ ] Cloudflare: Bot Fight Mode on, WAF managed rules on, rate-limit rule on `/v1/checkout` and `/v1/auth/*`, DNSSEC on
+- [ ] A backup has been restored successfully within the last 7 days (Supabase → Database → Backups)
+- [ ] Privacy page reachable from checkout; the shop's email is filled in on it
+- [ ] Every staff PIN set, shop devices paired, and the Owner knows how to revoke a lost device
+- [ ] The table standees are printed with the **final** web address in the QR codes
+
+## 7. If something goes wrong
+
+| Problem | Do this |
+|---|---|
+| Orders aren't arriving | Risk screen → money check. If Razorpay shows payments we don't, the reconcile job repairs them within 10 minutes; press it manually with the job secret if needed |
+| Payments are failing | Razorpay dashboard → is the account live and the webhook healthy? Customers see "please order at the counter" automatically |
+| A device is lost | Admin → Devices → Revoke. Sessions on it stop instantly |
+| Prices look wrong | Audit log shows every change with who and when; a price put back within a day is flagged on the Risk screen |
+| Something looks tampered with | Risk screen → tamper check. If it says broken, take a backup copy of the database and call the developer before making changes |
+
+## 8. Rolling back
+
+Cloudflare Pages keeps every deployment: open the project → Deployments → "Rollback to this
+version" (instant). Database migrations are forward-only; if one needs undoing, write a new
+migration. The Edge Function can be redeployed from any git commit with
+`npx supabase functions deploy api --no-verify-jwt`.

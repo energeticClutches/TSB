@@ -1,0 +1,17 @@
+{
+  "extends": "../packages/config/tsconfig.base.json",
+  "compilerOptions": {
+    "types": [
+      "node"
+    ],
+    "allowImportingTsExtensions": true
+  },
+  "include": [
+    "tests",
+    "functions/api/**/*.ts",
+    "vitest.config.ts"
+  ],
+  "exclude": [
+    "functions/api/index.ts"
+  ]
+}

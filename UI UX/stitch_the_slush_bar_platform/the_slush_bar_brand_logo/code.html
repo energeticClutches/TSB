@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <linearGradient id="pinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF2E93" />
+      <stop offset="100%" stop-color="#E6007A" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#e6007a" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <!-- Outer circular badge with dashed decorative border -->
+  <circle cx="120" cy="120" r="112" fill="#FFF5F8" stroke="#E6007A" stroke-width="6" filter="url(#glow)"/>
+  <circle cx="120" cy="120" r="102" fill="none" stroke="#E6007A" stroke-width="2" stroke-dasharray="6,5" opacity="0.6"/>
+  
+  <!-- Slush cup icon -->
+  <g transform="translate(120, 78) scale(0.95)">
+    <!-- Cup body -->
+    <path d="M-28,0 L-20,44 C-19,48 -14,52 -8,52 L8,52 C14,52 19,48 20,44 L28,0 Z" fill="url(#pinkGrad)"/>
+    <!-- Slush dome swirl -->
+    <path d="M-26,-2 C-26,-22 -14,-34 0,-34 C14,-34 26,-22 26,-2 Z" fill="#FF52AF"/>
+    <path d="M-18,-4 C-18,-20 -8,-28 0,-28 C8,-28 18,-20 18,-4 Z" fill="#FFE3F1"/>
+    <!-- Straw -->
+    <path d="M-2,-42 L18,-8 L12,-6 L-8,-40 Z" fill="#FFFFFF"/>
+    <line x1="-2" y1="-42" x2="18" y2="-8" stroke="#E6007A" stroke-width="2" stroke-dasharray="3,3"/>
+  </g>
+
+  <!-- Typography Arc: THE SLUSH BAR -->
+  <text x="120" y="44" font-family="'Outfit', 'Fredoka', 'Montserrat', sans-serif" font-weight="900" font-size="19" fill="#E6007A" text-anchor="middle" letter-spacing="3">THE</text>
+  <text x="120" y="162" font-family="'Outfit', 'Fredoka', 'Montserrat', sans-serif" font-weight="900" font-size="28" fill="#E6007A" text-anchor="middle" letter-spacing="1">SLUSH</text>
+  <text x="120" y="188" font-family="'Outfit', 'Fredoka', 'Montserrat', sans-serif" font-weight="900" font-size="20" fill="#1A1118" text-anchor="middle" letter-spacing="6">BAR</text>
+  
+  <!-- Sub-label below -->
+  <text x="120" y="208" font-family="sans-serif" font-weight="700" font-size="8.5" fill="#E6007A" text-anchor="middle" letter-spacing="1.5">ICE CREAM • SHAKES • SLUSH</text>
+</svg>

@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # TODO(security, Phase 8 §3.2): pin these actions to full commit SHAs.
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - name: Unit tests with coverage gate (pricing/token maths must stay at 100%)
+        run: npx vitest run --coverage
+        working-directory: packages/core
+      - name: Database, security and API tests (real migrations in PGlite)
+        run: npm test -w supabase
+      - name: Dependency audit (fails on high-severity problems)
+        run: npm audit --audit-level=high
+      - name: Builds (production settings: no demo code in the shipped apps)
+        run: npm run build
+        env:
+          VITE_DEMO: 'false'
+          VITE_SUPABASE_URL: https://example.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci
+      - name: No demo database engine in the production admin build
+        run: |
+          if grep -rl "pglite" apps/admin/dist/assets >/dev/null 2>&1; then
+            echo "PGlite leaked into the production admin build"; exit 1
+          fi

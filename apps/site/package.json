@@ -1,0 +1,21 @@
+{
+  "name": "@slush/site",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --port 4321",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "node -e \"console.log('site: checked by the build (astro check does not support TypeScript 7 yet)')\""
+  },
+  "dependencies": {
+    "@slush/ui": "*"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.3.4",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "slush-bar",
+  "private": true,
+  "description": "The Slush Bar: QR ordering, billing, tokens and admin platform",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "supabase"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:db": "npm run test -w supabase",
+    "dev:admin": "npm run dev -w apps/admin",
+    "build": "npm run build --workspaces --if-present"
+  }
+}

@@ -1,0 +1,32 @@
+@import 'tailwindcss';
+@import '@slush/ui/theme.css';
+
+/* Poster intensity lives here and nowhere else (Phase 6 D1). */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .float {
+    animation: none;
+  }
+}

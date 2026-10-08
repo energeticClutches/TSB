@@ -1,0 +1,7 @@
+# The ordering app is for customers who scan a QR code, not for search engines.
+User-agent: *
+Disallow: /order/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /find
+Allow: /

@@ -1,0 +1,9 @@
+{
+  "name": "The Slush Bar",
+  "short_name": "Slush Bar",
+  "start_url": "/menu",
+  "display": "standalone",
+  "background_color": "#FFF7F9",
+  "theme_color": "#E6007A",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
