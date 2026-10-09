@@ -29,6 +29,36 @@ project ref before the first deploy.
 Setting `VITE_SUPABASE_URL` switches demo mode off; `VITE_DEMO=false` makes sure of it, and the
 build then contains none of the demo code.
 
+### Hosting on Vercel instead of Cloudflare Pages
+
+Each app has a `vercel.json` (generated from its `public/_headers`, so the security policies are
+identical: CSP, HSTS, no-referrer on order links, and so on). Vercel ignores `_headers` and
+`_redirects`; those stay in the repo for the Cloudflare route.
+
+Create **one Vercel project per app**, all from this repository, each with its **Root Directory**
+set to the app's folder. Everything else (framework, install from the repo root, build command,
+output folder, Node 24) is read from that app's `vercel.json` and `package.json`.
+
+| Vercel project | Root Directory | Environment variables |
+|---|---|---|
+| `slush-bar-order` | `apps/customer` | none needed while it runs in demo mode; later `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` (both public), `VITE_DEMO=false` |
+| `slush-bar-site` | `apps/site` | `PUBLIC_ORDER_URL` = the ordering app's URL, `SITE_URL` = this site's own URL |
+| `slush-bar-admin` | `apps/admin` | not deployed until Supabase exists; then as the table above plus `VITE_ORDER_URL` |
+
+Pushes to `main` redeploy automatically once the project is connected to the GitHub repository.
+
+**The `/v1/*` API proxy is deliberately not in the Vercel config yet.** On Cloudflare it forwards
+to the Supabase Edge Function, and there is no Supabase project to point at. When there is, add
+this to `apps/customer/vercel.json` (and the admin's), *before* the catch-all rewrite:
+
+```json
+{ "source": "/v1/(.*)", "destination": "https://<project-ref>.supabase.co/functions/v1/api/v1/$1" }
+```
+
+**Plan limits:** Vercel's free Hobby plan is for personal, non-commercial use. A shop's ordering
+site is commercial, so a live shop belongs on a paid plan, or on Cloudflare Pages, whose free
+plan allows commercial use.
+
 ## 3. Database and API
 
 Follow "Setting up Supabase" in [IMPLEMENTATION-NOTES.md](IMPLEMENTATION-NOTES.md), then:
