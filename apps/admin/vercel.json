@@ -4,6 +4,18 @@
   "installCommand": "cd ../.. && npm ci",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "git": {
+    "deploymentEnabled": {
+      "main": false
+    }
+  },
+  "ignoreCommand": "[ \"$VERCEL_ENV\" != \"preview\" ]",
+  "build": {
+    "env": {
+      "VITE_DEMO": "true",
+      "VITE_ORDER_URL": "https://slush-bar-order.vercel.app"
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",
