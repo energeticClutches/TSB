@@ -43,7 +43,7 @@ output folder, Node 24) is read from that app's `vercel.json` and `package.json`
 |---|---|---|
 | `slush-bar-order` | `apps/customer` | none needed while it runs in demo mode; later `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` (both public), `VITE_DEMO=false` |
 | `slush-bar-site` | `apps/site` | `PUBLIC_ORDER_URL` = the ordering app's URL, `SITE_URL` = this site's own URL |
-| `slush-bar-admin` | `apps/admin` | not deployed until Supabase exists; then as the table above plus `VITE_ORDER_URL` |
+| `slush-bar-admin` | `apps/admin` | none in the dashboard: demo-mode values live in `apps/admin/vercel.json` (`build.env`) |
 
 Pushes to `main` redeploy automatically once the project is connected to the GitHub repository.
 
@@ -57,6 +57,32 @@ Pushes to `main` redeploy automatically once the project is connected to the Git
 Both build from `main`, so every push to `main` redeploys them. `site` has two variables set in
 the Vercel dashboard, `PUBLIC_ORDER_URL` and `SITE_URL`; the ordering app needs none while it
 runs in demo mode (simulated payments, nothing leaves the browser).
+
+**The staff app is a protected demo, deliberately not on a public address.** Vercel's free plan
+only puts a login in front of *preview* deployments; a project's main `*.vercel.app` production
+address stays public (checked from a signed-out browser). The admin demo has a role picker and no
+sign-in, so it must never be served from there. `apps/admin/vercel.json` therefore:
+
+- turns off deployments for `main` (`git.deploymentEnabled`), so a push to `main` can never
+  publish it;
+- builds only the `admin-demo` branch (`ignoreCommand` on `VERCEL_GIT_COMMIT_REF`; any other
+  branch, or an unset value, skips the build);
+- sets `VITE_DEMO=true` and `VITE_ORDER_URL` in `build.env` (public values);
+- allows `'wasm-unsafe-eval'` in its Vercel CSP only, because the demo's in-browser Postgres
+  (PGlite) is WebAssembly. It does not allow `eval()`, and the Cloudflare `_headers` stay strict.
+
+The demo lives at `https://slush-bar-admin-git-admin-demo-energeticclutches-projects.vercel.app`
+and only a signed-in member of the Vercel team can open it. Everyone else is redirected to
+Vercel's login. The demo database exists only in each visitor's own browser; it holds no real
+data. To refresh it after `main` moves:
+
+```bash
+git push origin main:admin-demo
+```
+
+**When the admin goes live on Supabase,** remove `git`, `ignoreCommand`, `build.env` and
+`'wasm-unsafe-eval'` from `apps/admin/vercel.json`, deploy it from `main`, and give it a real
+protection plan (the free plan cannot protect a production address).
 
 **The `/v1/*` API proxy is deliberately not in the Vercel config yet.** On Cloudflare it forwards
 to the Supabase Edge Function, and there is no Supabase project to point at. When there is, add
