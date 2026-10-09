@@ -47,6 +47,17 @@ output folder, Node 24) is read from that app's `vercel.json` and `package.json`
 
 Pushes to `main` redeploy automatically once the project is connected to the GitHub repository.
 
+**Current deployments (demo mode, Vercel Hobby, no backend):**
+
+| Project | Address | Root Directory |
+|---|---|---|
+| `site` (marketing page) | https://site-eight-amber-41.vercel.app | `apps/site` |
+| `slush-bar-order` (ordering app) | https://slush-bar-order.vercel.app | `apps/customer` |
+
+Both build from `main`, so every push to `main` redeploys them. `site` has two variables set in
+the Vercel dashboard, `PUBLIC_ORDER_URL` and `SITE_URL`; the ordering app needs none while it
+runs in demo mode (simulated payments, nothing leaves the browser).
+
 **The `/v1/*` API proxy is deliberately not in the Vercel config yet.** On Cloudflare it forwards
 to the Supabase Edge Function, and there is no Supabase project to point at. When there is, add
 this to `apps/customer/vercel.json` (and the admin's), *before* the catch-all rewrite:
