@@ -58,6 +58,12 @@ Both build from `main`, so every push to `main` redeploys them. `site` has two v
 the Vercel dashboard, `PUBLIC_ORDER_URL` and `SITE_URL`; the ordering app needs none while it
 runs in demo mode (simulated payments, nothing leaves the browser).
 
+**Search engines are told to ignore both public sites for now.** While the ordering app is a demo
+with simulated payments, the marketing page and the ordering app send `X-Robots-Tag: noindex,
+nofollow` (in their `vercel.json`), so Google doesn't send real customers to a shop that can't
+take their order yet. **Remove that header from both files at launch**, or the shop will never
+appear in search results. The Cloudflare `_headers` files don't carry it.
+
 **The staff app is a protected demo, deliberately not on a public address.** Vercel's free plan
 only puts a login in front of *preview* deployments; a project's main `*.vercel.app` production
 address stays public (checked from a signed-out browser). The admin demo has a role picker and no
